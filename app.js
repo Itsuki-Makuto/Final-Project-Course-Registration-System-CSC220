@@ -1,16 +1,20 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
+const cors = require("cors");
 require("dotenv").config();
+
+const authRoutes = require("./server/routes/auth");
 
 const app = express();
 
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static("public"));
+
+// Middleware
+app.use(cors());
+app.use(express.json());
 
 
-// Connection to MongoDB
-mongoose.connect(process.env.MONGO_URI)   
+// MongoDB connection
+mongoose.connect(process.env.MONGO_URI)
     .then(() => {
         console.log("Connected to MongoDB");
     })
@@ -19,51 +23,19 @@ mongoose.connect(process.env.MONGO_URI)
     });
 
 
-// User model
-const User = mongoose.model("User", {
-    email: String,
-    password: String
+// Routes
+app.use("/api/auth", authRoutes);
+
+
+// Test route
+app.get("/", (req, res) => {
+    res.json({
+        message: "Course Registration API is running"
+    });
 });
 
 
-// Login
-app.post("/login", async (req, res) => {
-
-    const { email, password } = req.body;
-
-    try {
-
-        // Find user by email
-        const user = await User.findOne({ email: email });
-
-        // User doesn't exist
-        if (!user) {
-            return res.status(401).send("Invalid email or password");
-        }
-
-        // Compare entered password with database hash
-        const passwordCorrect = await bcrypt.compare(
-            password,
-            user.password
-        );
-
-        // Password is wrong
-        if (!passwordCorrect) {
-            return res.status(401).send("Invalid email or password");
-        }
-
-        // Everything is correct
-        res.send("Login successful!");
-
-    } catch (error) {
-
-        console.error(error);
-        res.status(500).send("Server error");
-
-    }
-});
-
-
+// Start server
 app.listen(3000, () => {
     console.log("Server running on http://localhost:3000");
 });
