@@ -31,7 +31,8 @@ function Login() {
                 JSON.stringify(data.user)
             );
 
-            alert(`Welcome, ${data.user.name}!`);
+            alert(`Welcome ${data.user.name}`);
+            window.location.href = "/";
 
         } catch (error) {
 

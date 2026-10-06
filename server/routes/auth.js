@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 const User = require("../models/User");
+const { authenticateToken } = require("../middleware/auth");
 
 const router = express.Router();
 
@@ -82,5 +83,39 @@ router.post("/login", async (req, res) => {
     }
 });
 
+// GET /api/auth/me
+router.get(
+    "/me",
+    authenticateToken,
+    async (req, res) => {
+        try {
+            const user = await User.findById(req.user.id)
+                .select("name email role studentId advisorId active");
+
+            if (!user) {
+                return res.status(404).json({
+                    error: "User not found"
+                });
+            }
+
+            if (!user.active) {
+                return res.status(403).json({
+                    error: "Account is inactive"
+                });
+            }
+
+            res.json({
+                user
+            });
+
+        } catch (error) {
+            console.error(error);
+
+            res.status(500).json({
+                error: "Failed to verify user"
+            });
+        }
+    }
+);
 
 module.exports = router;

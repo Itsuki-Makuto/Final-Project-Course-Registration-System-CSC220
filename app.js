@@ -4,6 +4,11 @@ const cors = require("cors");
 require("dotenv").config();
 
 const authRoutes = require("./server/routes/auth");
+const offeringRoutes = require("./server/routes/offerings");            // offering route to app (Min)
+const courseRoutes = require("./server/routes/courses");                // Courses route to app (Min)
+const userRoutes = require("./server/routes/users");                    // Users API (Min)
+const recordRoutes = require("./server/routes/records");                // Record API (Min)
+const registrationRoutes = require("./server/routes/registrations");    // Registration API
 
 const app = express();
 
@@ -24,7 +29,12 @@ mongoose.connect(process.env.MONGO_URI)
 
 
 // Routes
-app.use("/api/auth", authRoutes);
+app.use("/api/auth", authRoutes);                    // Connect to auth
+app.use("/api/offerings", offeringRoutes);           // Connect to offering 
+app.use("/api/courses", courseRoutes);               // Connect to courses
+app.use("/api/users", userRoutes);                   // Connect to users
+app.use("/api/records", recordRoutes);               // Connect to records
+app.use("/api/registrations", registrationRoutes);   // Connect to registations
 
 
 // Test route
