@@ -1,0 +1,21 @@
+.student-overview {
+  max-width: 48rem;
+  padding: 2rem;
+  border-top: 3px solid var(--bs-primary);
+}
+
+.student-overview h2 {
+  margin-bottom: 0.75rem;
+  color: var(--bs-primary);
+}
+
+.student-overview p {
+  max-width: 36rem;
+  line-height: 1.7;
+}
+
+@media (max-width: 575.98px) {
+  .student-overview {
+    padding: 1.25rem;
+  }
+}

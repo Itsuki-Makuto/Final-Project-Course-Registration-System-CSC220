@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { login } from "../services/api";
+import "../css/Login.css";
 
 function Login() {
 
@@ -49,7 +50,7 @@ function Login() {
     return (
         <div className="login-page">
 
-            <div className="login-box">
+            <div className="login-box card">
 
                 <h1>Course Registration</h1>
 
@@ -57,10 +58,13 @@ function Login() {
 
                 <form onSubmit={handleLogin}>
 
-                    <div>
-                        <label>Email</label>
+                    <div className="mb-3">
+                        <label className="form-label" htmlFor="email">Email</label>
 
                         <input
+                            className="form-control"
+                            id="email"
+                            autoComplete="username"
                             type="email"
                             value={email}
                             onChange={(event) =>
@@ -72,10 +76,13 @@ function Login() {
                     </div>
 
 
-                    <div>
-                        <label>Password</label>
+                    <div className="mb-4">
+                        <label className="form-label" htmlFor="password">Password</label>
 
                         <input
+                            className="form-control"
+                            id="password"
+                            autoComplete="current-password"
                             type="password"
                             value={password}
                             onChange={(event) =>
@@ -88,13 +95,14 @@ function Login() {
 
 
                     {error && (
-                        <p className="error">
+                        <p className="alert alert-danger" role="alert">
                             {error}
                         </p>
                     )}
 
 
                     <button
+                        className="btn btn-primary w-100"
                         type="submit"
                         disabled={loading}
                     >

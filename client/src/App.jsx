@@ -60,7 +60,7 @@ function App() {
     }
 
     if (loading) {
-        return <p>Checking login...</p>;
+        return <p className="container py-5 text-body-secondary" role="status">Checking login...</p>;
     }
 
     if (!user) {

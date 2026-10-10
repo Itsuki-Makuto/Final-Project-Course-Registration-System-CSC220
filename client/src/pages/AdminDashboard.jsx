@@ -1,3 +1,6 @@
+import Navbar from "../components/Navbar";
+import "../css/AdminDashboard.css";
+
 function AdminDashboard() {
     const user = JSON.parse(localStorage.getItem("user"));
 
@@ -8,20 +11,14 @@ function AdminDashboard() {
     }
 
     return (
-        <div>
-            <h1>Admin Dashboard</h1>
-
-            <p>
-                Welcome, {user?.name || "Admin"}
-            </p>
-
-            <p>
-                Admin dashboard coming soon.
-            </p>
-
-            <button onClick={logout}>
-                Logout
-            </button>
+        <div className="admin-dashboard">
+            <Navbar title="Admin Dashboard" user={user || { role: "Admin" }} onLogout={logout} />
+            <main className="container dashboard-content">
+                <section className="card dashboard-section admin-overview">
+                    <h2>Administration</h2>
+                    <p className="text-body-secondary">Admin dashboard coming soon.</p>
+                </section>
+            </main>
         </div>
     );
 }
