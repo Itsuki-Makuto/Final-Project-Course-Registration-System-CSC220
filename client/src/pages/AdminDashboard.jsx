@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import "../css/AdminDashboard.css";
 
+//functions
 function AdminDashboard() {
   const user = JSON.parse(localStorage.getItem("user") || "null");
 
@@ -441,4 +442,3 @@ function AdminDashboard() {
 }
 
 export default AdminDashboard;
-//Atisha only contriputed a few parts in this dashboard
