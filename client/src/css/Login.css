@@ -1,0 +1,36 @@
+.login-page {
+  display: grid;
+  min-height: 100vh;
+  min-height: 100svh;
+  place-items: center;
+  padding: 1.5rem;
+}
+
+.login-box {
+  width: 100%;
+  max-width: 26rem;
+  padding: 2rem;
+}
+
+.login-box h1 {
+  margin-bottom: 0.5rem;
+  font-size: 1.6rem;
+  font-weight: 600;
+}
+
+.login-box h2 {
+  margin-bottom: 1.75rem;
+  color: #64748b;
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+@media (max-width: 575.98px) {
+  .login-page {
+    padding: 1rem;
+  }
+
+  .login-box {
+    padding: 1.5rem;
+  }
+}
