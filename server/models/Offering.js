@@ -11,7 +11,9 @@ const offeringSchema = new mongoose.Schema({
   instructor: { type: String, required: true },
   seats: { type: Number, required: true },
   seatsTaken: { type: Number, default: 0 },
-  addDropOpen: { type: Boolean, default: false }
+  addDropOpen: { type: Boolean, default: false },
+  addDropCloseDate: { type: Date, default: null     //  added Opening and Close date (Min)
+}
 });
 
 module.exports = mongoose.model('Offering', offeringSchema);
