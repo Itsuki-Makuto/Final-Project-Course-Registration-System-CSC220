@@ -23,6 +23,10 @@ function AdminDashboard() {
       });
      
       const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to fetch users");
+      }
       setUsers(data);
     } catch (err) {
       setError(err.message);
