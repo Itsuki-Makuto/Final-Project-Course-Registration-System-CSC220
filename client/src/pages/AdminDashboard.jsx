@@ -1,49 +1,42 @@
 import { useEffect, useState } from "react";
-
+import Navbar from "../components/Navbar";
+import "../css/AdminDashboard.css";
 
 function AdminDashboard() {
-    const user = JSON.parse(localStorage.getItem("user"));
-  
-    const [users, setUsers] = useState([]);
-    const [roleFilter, setRoleFilter] = useState("all");    
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [showCreateForm, setShowCreateForm] = useState(false);
-    const [formData, setFormData] = useState({
-        name: "",
-        email: "",
-        role: "student",
-        studentId: "",
-        password: ""
-    });
-    const [formMessage, setFormMessage] = useState("");
-    
-    const [editingUser, setEditingUser] = useState(null);
-    const [editFormData, setEditFormData] = useState({
-        name: "",
-        email: "",
-        role: "student",
-        studentId: ""
-    });
-    const [editMessage, setEditMessage] = useState("");
+  const user = JSON.parse(localStorage.getItem("user") || "null");
 
+  const [users, setUsers] = useState([]);
+  const [roleFilter, setRoleFilter] = useState("all");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    role: "student",
+    studentId: "",
+    password: "",
+  });
+  const [formMessage, setFormMessage] = useState("");
+  const [editingUser, setEditingUser] = useState(null);
+  const [editFormData, setEditFormData] = useState({
+    name: "",
+    email: "",
+    role: "student",
+    studentId: "",
+  });
+  const [editMessage, setEditMessage] = useState("");
 
   async function loadUsers() {
     setLoading(true);
-    setError("")
+    setError("");
 
     try {
       const token = localStorage.getItem("token");
       const query = roleFilter === "all" ? "" : `?role=${roleFilter}`;
-      const response = await fetch(
-          `http://localhost:3000/api/users${query}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
-     
+      const response = await fetch(`http://localhost:3000/api/users${query}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       const data = await response.json();
 
       if (!response.ok) {
@@ -51,414 +44,400 @@ function AdminDashboard() {
       }
       setUsers(data);
     } catch (err) {
-      setError(err.message);
+      setError(err.message || "Failed to fetch users");
     } finally {
       setLoading(false);
     }
   }
+
   async function createUser(e) {
     e.preventDefault();
     setFormMessage("");
 
     try {
-        const token = localStorage.getItem("token");
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:3000/api/users", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(formData),
+      });
+      const data = await response.json();
 
-        const response = await fetch("http://localhost:3000/api/users", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`
-            },
-            body: JSON.stringify(formData)
-        });
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to create user");
+      }
 
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.error || "Failed to create user");
-        }
-
-        setFormMessage("User created successfully!");
-
-        setFormData({
-            name: "",
-            email: "",
-            role: "student",
-            studentId: "",
-            password: ""
-        });
-
-        setShowCreateForm(false);
-        await loadUsers();
+      setFormMessage("User created successfully!");
+      setFormData({
+        name: "",
+        email: "",
+        role: "student",
+        studentId: "",
+        password: "",
+      });
+      setShowCreateForm(false);
+      await loadUsers();
     } catch (err) {
-        setFormMessage(err.message);
+      setFormMessage(err.message || "Failed to create user");
     }
-}
+  }
 
-  
-function startEditing(user) {
-    setEditingUser(user._id);
+  function startEditing(selectedUser) {
+    setEditingUser(selectedUser._id);
     setEditMessage("");
-
     setEditFormData({
-        name: user.name || "",
-        email: user.email || "",
-        role: user.role || "student",
-        studentId: user.studentId || ""
+      name: selectedUser.name || "",
+      email: selectedUser.email || "",
+      role: selectedUser.role || "student",
+      studentId: selectedUser.studentId || "",
     });
-}
+  }
 
-async function updateUser(e) {
+  async function updateUser(e) {
     e.preventDefault();
     setEditMessage("");
 
     try {
-        const token = localStorage.getItem("token");
-
-        const response = await fetch(
-            `http://localhost:3000/api/users/${editingUser}`,
-            {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`
-                },
-                body: JSON.stringify(editFormData)
-            }
-        );
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.error || "Failed to update user");
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `http://localhost:3000/api/users/${editingUser}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(editFormData),
         }
+      );
+      const data = await response.json();
 
-        setEditMessage("User updated successfully!");
-        setEditingUser(null);
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to update user");
+      }
 
-        await loadUsers();
+      setEditMessage("User updated successfully!");
+      setEditingUser(null);
+      await loadUsers();
     } catch (err) {
-        setEditMessage(err.message);
+      setEditMessage(err.message || "Failed to update user");
     }
-}
+  }
 
-
-async function deleteUser(userToDelete) {
+  async function deleteUser(userToDelete) {
     const confirmed = window.confirm(
-      `Delete ${userToDelete.name}?\n\n` +
-      "If this student has academic records or registrations, " +
-      "their account will be deactivated instead."
+      `Delete ${userToDelete.name}?\n\nIf this student has academic records or registrations, their account will be deactivated instead.`
     );
-
     if (!confirmed) return;
 
     try {
-        const token = localStorage.getItem("token");
-
-        const response = await fetch(
-            `http://localhost:3000/api/users/${userToDelete._id}`,
-            {
-                method: "DELETE",
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            }
-        );
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.error || "Failed to delete user");
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `http://localhost:3000/api/users/${userToDelete._id}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
         }
+      );
+      const data = await response.json();
 
-        if (data.action === "deactivated") {
-          alert("User deactivated to preserve academic history.");
-        } else {
-          alert("User permanently deleted.");
-        }
-        await loadUsers();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to delete user");
+      }
+
+      alert(data.message || (data.action === "deactivated"
+        ? "User deactivated to preserve academic history."
+        : "User permanently deleted."));
+      await loadUsers();
     } catch (err) {
-        alert(err.message);
+      alert(err.message || "Failed to delete user");
     }
-}
+  }
 
-
-async function changeUserStatus(u) {
-    const nextStatus = u.active === false;
-
+  async function changeUserStatus(selectedUser) {
+    const nextStatus = selectedUser.active === false;
     const action = nextStatus ? "reactivate" : "deactivate";
 
-    if (!window.confirm(`Are you sure you want to ${action} ${u.name}?`)) {
-        return;
+    if (!window.confirm(`Are you sure you want to ${action} ${selectedUser.name}?`)) {
+      return;
     }
 
     try {
-        const token = localStorage.getItem("token");
-
-        const response = await fetch(
-            `http://localhost:3000/api/users/${u._id}/status`,
-            {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`
-                },
-                body: JSON.stringify({ active: nextStatus })
-            }
-        );
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.error || "Failed to change status");
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `http://localhost:3000/api/users/${selectedUser._id}/status`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ active: nextStatus }),
         }
+      );
+      const data = await response.json();
 
-        alert(data.message);
-        await loadUsers();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to change account status");
+      }
+
+      alert(data.message || "Account status updated.");
+      await loadUsers();
     } catch (err) {
-        alert(err.message);
+      alert(err.message || "Failed to change account status");
     }
-}
+  }
 
- 
   useEffect(() => {
-        loadUsers();
-    }, [roleFilter]);
-
+    loadUsers();
+  }, [roleFilter]);
 
   function logout() {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        window.location.href = "/";
-    }
-    
-  return (
-        <div>
-            <h1>Admin Dashboard</h1>
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    window.location.href = "/";
+  }
 
-            <p>
-                Welcome, {user?.name || "Admin"}
-            </p>
-      <h2>Users</h2>
-        <select
-          value={roleFilter}
-          onChange={(e) => setRoleFilter(e.target.value)}
-        >
-            <option value="all">All</option>
+  return (
+    <div className="admin-dashboard">
+      <Navbar
+        title="Admin Dashboard"
+        user={user || { role: "Admin" }}
+        onLogout={logout}
+      />
+
+      <main className="container dashboard-content">
+        <section className="card dashboard-section admin-overview">
+          <h2>Administration</h2>
+          <p className="text-body-secondary">
+            Manage user accounts, roles, and account status.
+          </p>
+        </section>
+
+        <section className="card dashboard-section">
+          <div className="dashboard-section-header">
+            <h2>Users</h2>
+            <button
+              type="button"
+              onClick={() => setShowCreateForm((shown) => !shown)}
+            >
+              {showCreateForm ? "Cancel" : "Create User"}
+            </button>
+          </div>
+
+          <label htmlFor="role-filter">Filter by role</label>
+          <select
+            id="role-filter"
+            value={roleFilter}
+            onChange={(e) => setRoleFilter(e.target.value)}
+          >
+            <option value="all">All roles</option>
             <option value="student">Students</option>
             <option value="advisor">Advisors</option>
-        </select>
+            <option value="admin">Admins</option>
+          </select>
 
-        <button onClick={() => setShowCreateForm(!showCreateForm)}>
-    {showCreateForm ? "Cancel" : "Create User"}
-</button>
+          {showCreateForm && (
+            <form className="user-form" onSubmit={createUser}>
+              <h3>Create User</h3>
 
-{showCreateForm && (
-    <form onSubmit={createUser}>
-        <div>
-            <label>Name</label>
-            <input
+              <label htmlFor="create-name">Name</label>
+              <input
+                id="create-name"
                 type="text"
                 value={formData.name}
-                onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
-            />
-        </div>
+              />
 
-        <div>
-            <label>Email</label>
-            <input
+              <label htmlFor="create-email">Email</label>
+              <input
+                id="create-email"
                 type="email"
                 value={formData.email}
-                onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
-            />
-        </div>
+              />
 
-        <div>
-            <label>Role</label>
-            <select
+              <label htmlFor="create-role">Role</label>
+              <select
+                id="create-role"
                 value={formData.role}
                 onChange={(e) =>
-                    setFormData({
-                        ...formData,
-                        role: e.target.value,
-                        studentId: ""
-                    })
+                  setFormData({
+                    ...formData,
+                    role: e.target.value,
+                    studentId: "",
+                  })
                 }
-            >
+              >
                 <option value="student">Student</option>
                 <option value="advisor">Advisor</option>
                 <option value="admin">Admin</option>
-            </select>
-        </div>
+              </select>
 
-        {formData.role === "student" && (
-            <div>
-                <label>Account ID</label>
-                <input
+              {formData.role === "student" && (
+                <>
+                  <label htmlFor="create-student-id">Student ID</label>
+                  <input
+                    id="create-student-id"
                     type="text"
                     value={formData.studentId}
-                    onChange={(e) =>
-                        setFormData({
-                            ...formData,
-                            studentId: e.target.value
-                        })
-                    }
+                    onChange={(e) => setFormData({ ...formData, studentId: e.target.value })}
                     required
-                />
-            </div>
-        )}
+                  />
+                </>
+              )}
 
-        <div>
-            <label>Initial Password</label>
-            <input
+              <label htmlFor="create-password">Initial password</label>
+              <input
+                id="create-password"
                 type="password"
                 value={formData.password}
-                onChange={(e) =>
-                    setFormData({
-                        ...formData,
-                        password: e.target.value
-                    })
-                }
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 minLength={8}
                 required
-            />
-        </div>
+              />
 
-        <button type="submit">Create User</button>
-    </form>
-)}
+              <button type="submit">Create User</button>
+              {formMessage && <p role="status">{formMessage}</p>}
+            </form>
+          )}
 
+          {editingUser && (
+            <form className="user-form" onSubmit={updateUser}>
+              <h3>Edit User</h3>
 
-{editingUser && (
-    <form onSubmit={updateUser}>
-        <h3>Edit User</h3>
+              <label htmlFor="edit-name">Name</label>
+              <input
+                id="edit-name"
+                type="text"
+                value={editFormData.name}
+                onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+                required
+              />
 
-        <label>Name</label>
-        <input
-            type="text"
-            value={editFormData.name}
-            onChange={(e) =>
-                setEditFormData({
-                    ...editFormData,
-                    name: e.target.value
-                })
-            }
-            required
-        />
+              <label htmlFor="edit-email">Email</label>
+              <input
+                id="edit-email"
+                type="email"
+                value={editFormData.email}
+                onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })}
+                required
+              />
 
-        <label>Email</label>
-        <input
-            type="email"
-            value={editFormData.email}
-            onChange={(e) =>
-                setEditFormData({
-                    ...editFormData,
-                    email: e.target.value
-                })
-            }
-            required
-        />
-
-        <label>Role</label>
-        <select
-            value={editFormData.role}
-            onChange={(e) =>
-                setEditFormData({
+              <label htmlFor="edit-role">Role</label>
+              <select
+                id="edit-role"
+                value={editFormData.role}
+                onChange={(e) =>
+                  setEditFormData({
                     ...editFormData,
                     role: e.target.value,
-                    studentId: ""
-                })
-            }
-        >
-            <option value="student">Student</option>
-            <option value="advisor">Advisor</option>
-            <option value="admin">Admin</option>
-        </select>
+                    studentId: "",
+                  })
+                }
+              >
+                <option value="student">Student</option>
+                <option value="advisor">Advisor</option>
+                <option value="admin">Admin</option>
+              </select>
 
-        {editFormData.role === "student" && (
-            <>
-                <label>Student ID</label>
-                <input
+              {editFormData.role === "student" && (
+                <>
+                  <label htmlFor="edit-student-id">Student ID</label>
+                  <input
+                    id="edit-student-id"
                     type="text"
                     value={editFormData.studentId}
-                    onChange={(e) =>
-                        setEditFormData({
-                            ...editFormData,
-                            studentId: e.target.value
-                        })
-                    }
+                    onChange={(e) => setEditFormData({ ...editFormData, studentId: e.target.value })}
                     required
-                />
-            </>
-        )}
+                  />
+                </>
+              )}
 
-        <button type="submit">Save Changes</button>
+              <div className="user-form-actions">
+                <button type="submit">Save Changes</button>
+                <button type="button" onClick={() => setEditingUser(null)}>
+                  Cancel
+                </button>
+              </div>
+              {editMessage && <p role="status">{editMessage}</p>}
+            </form>
+          )}
 
-        <button
-            type="button"
-            onClick={() => setEditingUser(null)}
-        >
-            Cancel
-        </button>
-    </form>
-)}
+          {loading && <p>Loading users...</p>}
+          {error && <p role="alert">Error: {error}</p>}
 
-{editMessage && <p>{editMessage}</p>}
-
-
-{formMessage && <p>{formMessage}</p>}
-
-            {loading && <p>Loading users...</p>}
-            {error && <p>Error: {error}</p>}
-            {!loading && !error && (
-                <ul>
-                    
+          {!loading && !error && (
+            <div className="users-table-wrapper">
+              <table className="users-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Account ID</th>
+                    <th>Student / Advisor ID</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
                   {users.map((u) => (
-                    <li key={u._id}>
-                      <strong>{u.name}</strong>
-                      {" — "}{u.email}
-                      {" — Role: "}{u.role}
-                      {" — Account ID: "}{u._id}
-
-                      {u.role === "student" && (
-                        <>{" — Student ID: "}{u.studentId || "Not assigned"}</>
-                      )}
-
-                      {u.role === "advisor" && (
-                        <>{" — Advisor ID: "}{u.advisorId || "Not assigned"}</>
-                      )}
-
-                      {u.active === false && " (Inactive)"}
-
-                      <button onClick={() => startEditing(u)}>
-                        Edit
-                      </button>
-
-                      <button onClick={() => deleteUser(u)}>
-                        Delete
-                      </button>
-
-                      <button onClick={() => changeUserStatus(u)}>
-                        {u.active === false ? "Reactivate" : "Deactivate"}
-                      </button>
-                    </li>
+                    <tr key={u._id}>
+                      <td>{u.name}</td>
+                      <td>{u.email}</td>
+                      <td>{u.role}</td>
+                      <td>
+                        {u.accountId ||
+                          `${String(u.role || "user").toUpperCase()}-${String(u._id).slice(-6).toUpperCase()}`}
+                      </td>
+                      <td>
+                        {u.role === "student"
+                          ? u.studentId || "Not assigned"
+                          : u.role === "advisor"
+                            ? u.advisorId || "Not assigned"
+                            : "—"}
+                      </td>
+                      <td className={u.active === false ? "status-inactive" : "status-active"}>
+                        {u.active === false ? "Inactive" : "Active"}
+                      </td>
+                      <td>
+                        <div className="user-actions">
+                          <button type="button" onClick={() => startEditing(u)}>
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            className="delete-button"
+                            onClick={() => deleteUser(u)}
+                          >
+                            Delete
+                          </button>
+                          <button type="button" onClick={() => changeUserStatus(u)}>
+                            {u.active === false ? "Reactivate" : "Deactivate"}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
                   ))}
-
-                </ul>
-            )}
-
-
-            <button onClick={logout}>
-                Logout
-            </button>
-        </div>
-    );
+                  {users.length === 0 && (
+                    <tr>
+                      <td colSpan="7">No users found.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      </main>
+    </div>
+  );
 }
 
 export default AdminDashboard;

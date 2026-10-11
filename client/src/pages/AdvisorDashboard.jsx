@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import "../css/AdvisorDashboard.css";
+import Navbar from "../components/Navbar";
 
 function AdvisorDashboard() {
 
@@ -575,24 +577,18 @@ async function updateOffering(event) {
     return (
         <div>
 
-            <header>
-                <h1>Advisor Dashboard</h1>
-
-                <p>
-                    Welcome, {user?.name || "Advisor"}
-                </p>
-
-                <button onClick={logout}>
-                    Logout
-                </button>
-            </header>
+            <Navbar title="Advisor Dashboard" user={user || { role: "Advisor" }} onLogout={logout} />
 
 
-            <main>
+            <main className="container dashboard-content">
 
+                <section className="card dashboard-section">
                 <h2>Student Registration</h2>
+                <label className="form-label" htmlFor="student">Student</label>
 
                     <select
+                        className="form-select student-select"
+                        id="student"
                         value={selectedStudent}
                         onChange={async (event) => {
                             const studentId = event.target.value;
@@ -625,14 +621,16 @@ async function updateOffering(event) {
                             </option>
                         ))}
                     </select>
+                </section>
 
                     {studentRecord && (
-    <div>
+    <section className="card dashboard-section">
         <h3>
             Academic Record: {studentRecord.student.name}
         </h3>
 
-        <table>
+        <div className="table-responsive">
+        <table className="table table-hover align-middle">
             <thead>
                 <tr>
                     <th>Term</th>
@@ -655,17 +653,19 @@ async function updateOffering(event) {
                 ))}
             </tbody>
         </table>
-    </div>
+        </div>
+    </section>
 )}
 
 {studentRecord && (
-    <div>
+    <section className="card dashboard-section">
         <h3>Current Registrations</h3>
 
         {registrations.length === 0 ? (
             <p>No courses currently registered.</p>
         ) : (
-            <table>
+            <div className="table-responsive">
+        <table className="table table-hover align-middle">
                 <thead>
                     <tr>
                         <th>Course</th>
@@ -705,7 +705,7 @@ async function updateOffering(event) {
                                 <td>{offering?.instructor}</td>
 
                                 <td>
-                                    <button
+                                    <button className="btn btn-outline-danger btn-sm"
                                         onClick={() =>
                                             removeRegistration(
                                                 registration._id
@@ -720,18 +720,20 @@ async function updateOffering(event) {
                     })}
                 </tbody>
             </table>
+        </div>
         )}
-    </div>
+    </section>
 )}
 
 {studentRecord && (
-    <div>
+    <section className="card dashboard-section">
         <h3>Eligible Courses</h3>
 
         {eligibleOfferings.length === 0 ? (
             <p>No eligible courses available.</p>
         ) : (
-            <table>
+            <div className="table-responsive">
+        <table className="table table-hover align-middle">
                 <thead>
                     <tr>
                         <th>Course</th>
@@ -759,7 +761,7 @@ async function updateOffering(event) {
                                         record.grade === "F"
                                 ) && (
                                     <div>
-                                        <strong>Retake Required</strong>
+                                        <span className="badge text-bg-warning mt-2">Retake Required</span>
                                     </div>
                                 )}
                             </td>
@@ -781,7 +783,7 @@ async function updateOffering(event) {
                             </td>
 
                             <td>
-                                <button
+                                <button className="btn btn-primary btn-sm"
                                     onClick={() => registerStudent(offering._id)}
                                 >
                                 Register
@@ -791,18 +793,20 @@ async function updateOffering(event) {
                     ))}
                 </tbody>
             </table>
+        </div>
         )}
-    </div>
+    </section>
 )}
 
 {studentRecord && (
-    <div>
+    <section className="card dashboard-section">
         <h3>Excluded Courses</h3>
 
         {excludedOfferings.length === 0 ? (
             <p>No excluded courses.</p>
         ) : (
-            <table>
+            <div className="table-responsive">
+        <table className="table table-hover align-middle">
                 <thead>
                     <tr>
                         <th>Course</th>
@@ -827,28 +831,31 @@ async function updateOffering(event) {
                     ))}
                 </tbody>
             </table>
+        </div>
         )}
-    </div>
+    </section>
 )}
 
+                <section className="card dashboard-section">
                 <h2>Course Offerings</h2>
-                <button onClick={() => setShowForm(!showForm)}>
+                <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
                     {showForm ? "Cancel" : "+ Create Offering"}
                 </button>
 
                 {showForm && (
-    <form onSubmit={editingId ? updateOffering : createOffering}>
+    <form className="offering-form" onSubmit={editingId ? updateOffering : createOffering}>
 
-        <h3>Create Course Offering</h3>
+        <h3>{editingId ? "Edit Course Offering" : "Create Course Offering"}</h3>
 
         {formError && (
-            <p>{formError}</p>
+            <p className="alert alert-danger mb-0" role="alert">{formError}</p>
         )}
 
         <div>
-            <label>Course: </label>
+            <label className="form-label" htmlFor="courseId">Course</label>
 
-            <select
+            <select className="form-select"
+                id="courseId"
                 name="courseId"
                 value={form.courseId}
                 onChange={handleFormChange}
@@ -870,10 +877,11 @@ async function updateOffering(event) {
         </div>
 
         <div>
-            <label>Term: </label>
+            <label className="form-label" htmlFor="term">Term</label>
 
-            <input
+            <input className="form-control"
                 type="text"
+                id="term"
                 name="term"
                 value={form.term}
                 onChange={handleFormChange}
@@ -882,10 +890,11 @@ async function updateOffering(event) {
         </div>
 
         <div>
-            <label>Section: </label>
+            <label className="form-label" htmlFor="section">Section</label>
 
-            <input
+            <input className="form-control"
                 type="number"
+                id="section"
                 name="section"
                 value={form.section}
                 onChange={handleFormChange}
@@ -895,9 +904,10 @@ async function updateOffering(event) {
         </div>
 
         <div>
-            <label>Day: </label>
+            <label className="form-label" htmlFor="day">Day</label>
 
-            <select
+            <select className="form-select"
+                id="day"
                 name="day"
                 value={form.day}
                 onChange={handleFormChange}
@@ -913,10 +923,11 @@ async function updateOffering(event) {
         </div>
 
         <div>
-            <label>Start Time: </label>
+            <label className="form-label" htmlFor="startTime">Start Time</label>
 
-            <input
+            <input className="form-control"
                 type="time"
+                id="startTime"
                 name="startTime"
                 value={form.startTime}
                 onChange={handleFormChange}
@@ -925,10 +936,11 @@ async function updateOffering(event) {
         </div>
 
         <div>
-            <label>End Time: </label>
+            <label className="form-label" htmlFor="endTime">End Time</label>
 
-            <input
+            <input className="form-control"
                 type="time"
+                id="endTime"
                 name="endTime"
                 value={form.endTime}
                 onChange={handleFormChange}
@@ -937,10 +949,11 @@ async function updateOffering(event) {
         </div>
 
         <div>
-            <label>Room: </label>
+            <label className="form-label" htmlFor="room">Room</label>
 
-            <input
+            <input className="form-control"
                 type="text"
+                id="room"
                 name="room"
                 value={form.room}
                 onChange={handleFormChange}
@@ -949,10 +962,11 @@ async function updateOffering(event) {
         </div>
 
         <div>
-            <label>Instructor: </label>
+            <label className="form-label" htmlFor="instructor">Instructor</label>
 
-            <input
+            <input className="form-control"
                 type="text"
+                id="instructor"
                 name="instructor"
                 value={form.instructor}
                 onChange={handleFormChange}
@@ -961,10 +975,11 @@ async function updateOffering(event) {
         </div>
 
         <div>
-            <label>Seats: </label>
+            <label className="form-label" htmlFor="seats">Seats</label>
 
-            <input
+            <input className="form-control"
                 type="number"
+                id="seats"
                 name="seats"
                 value={form.seats}
                 onChange={handleFormChange}
@@ -973,7 +988,7 @@ async function updateOffering(event) {
             />
         </div>
 
-        <button type="submit">
+        <button className="btn btn-primary" type="submit">
             {creating
                 ? (editingId ? "Updating..." : "Creating...")
                 : (editingId ? "Update Offering" : "Create Offering")}
@@ -982,18 +997,18 @@ async function updateOffering(event) {
         </form>
 )}
 
-                <p>
+                <p className="text-body-secondary my-3">
                     Current Term: <strong>2026-1</strong>
                 </p>
 
 
                 {loading && (
-                    <p>Loading offerings...</p>
+                    <p className="text-body-secondary" role="status">Loading offerings...</p>
                 )}
 
 
                 {error && (
-                    <p>
+                    <p className="alert alert-danger" role="alert">
                         Error: {error}
                     </p>
                 )}
@@ -1008,7 +1023,8 @@ async function updateOffering(event) {
 
                 {!loading && !error && offerings.length > 0 && (
 
-                    <table>
+                    <div className="table-responsive">
+        <table className="table table-hover align-middle">
 
                         <thead>
                             <tr>
@@ -1032,11 +1048,11 @@ async function updateOffering(event) {
                                 <tr key={offering._id}>
                                    
                                         <td>                                   
-                                            <button onClick={() => startEditing(offering)}>
+                                            <button className="btn btn-outline-primary btn-sm" onClick={() => startEditing(offering)}>
                                                 Edit
                                             </button>
 
-                                            <button onClick={() => deleteOffering(offering._id)}>
+                                            <button className="btn btn-outline-danger btn-sm" onClick={() => deleteOffering(offering._id)}>
                                                 Delete
                                             </button>
                                         </td>
@@ -1076,12 +1092,14 @@ async function updateOffering(event) {
                                     </td>
 
                                     <td>
-                                        <button onClick={() => toggleAddDrop(offering)}>
+                                        <button className="btn btn-outline-secondary btn-sm" onClick={() => toggleAddDrop(offering)}>
                                             {offering.addDropOpen ? "Close" : "Open"}
                                         </button>
 
                                         <div>
-                                            {offering.addDropOpen ? "Open" : "Closed"}
+                                            <span className={offering.addDropOpen ? "badge text-bg-success" : "badge text-bg-secondary"}>
+                                                {offering.addDropOpen ? "Open" : "Closed"}
+                                            </span>
                                         </div>
 
                                             {offering.addDropOpen && offering.addDropCloseDate && (
@@ -1099,9 +1117,11 @@ async function updateOffering(event) {
                         </tbody>
 
                     </table>
+        </div>
 
                 )}
 
+                </section>
             </main>
 
         </div>
