@@ -1,11 +1,19 @@
 function StudentDashboard() {
     const user = JSON.parse(localStorage.getItem("user"));
 
+    const [coursesregistered, setCoursesRegistered] = useState([]);
+    const [completedcourses, setCompletedCourses] = useState([]);
+    const [terms, setTerms] = useState([]);
+    const [gpa, setGPA] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
     function logout() {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
         window.location.href = "/";
     }
+
 
     return (
         <div>
@@ -15,9 +23,6 @@ function StudentDashboard() {
                 Welcome, {user?.name || "Student"}
             </p>
 
-            <p>
-                Student dashboard coming soon.
-            </p>
 
             <button onClick={logout}>
                 Logout

@@ -37,5 +37,16 @@ router.get(
     }
 );
 
+// GET /api/users?role=student
+router.get("/", authenticateToken, requireRole("admin"), async (req, res) => {
+    try {
+        const filter = req.query.role ? { role: req.query.role } : {};
+        const users = await User.find(filter).select("-passwordHash").sort({ name: 1 });
+        res.json(users);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Failed to fetch users" });
+    }
+});
 
 module.exports = router;
