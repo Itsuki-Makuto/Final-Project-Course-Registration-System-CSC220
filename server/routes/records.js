@@ -11,13 +11,32 @@ const {
 
 
 // GET /api/records/student/:studentId
-// Advisor views a student's academic record
+
+ // Advisor views a student's academic record
+ // Student can also view their own academic record
+
+
 router.get(
     "/student/:studentId",
     authenticateToken,
-    requireRole("advisor"),
-    async (req, res) => {
+    (req, res, next) => {
+        const isAdvisor = req.user.role === "advisor";
+        console.log("JWT USER ID:", req.user.id);
+        console.log("JWT ROLE:", req.user.role);
+        console.log("REQUESTED ID:", req.params.studentId);
+        const isStudentOwner =
+            req.user.role === "student" &&
+            String(req.user.id) === String(req.params.studentId);
 
+        if (isAdvisor || isStudentOwner) {
+            return next();
+        }
+
+        return res.status(403).json({
+            error: "Access denied"
+        });
+    },
+    async (req, res) => {
         try {
             const student = await User.findOne({
                 _id: req.params.studentId,
@@ -33,8 +52,8 @@ router.get(
             const records = await Record.find({
                 studentId: student._id
             })
-            .populate("courseId", "code title credits")
-            .sort({ term: 1 });
+                .populate("courseId", "code title credits")
+                .sort({ term: 1 });
 
             res.json({
                 student,
@@ -42,7 +61,6 @@ router.get(
             });
 
         } catch (error) {
-
             console.error(error);
 
             res.status(500).json({
