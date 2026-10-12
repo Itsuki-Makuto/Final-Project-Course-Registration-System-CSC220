@@ -12,6 +12,7 @@ const courseRoutes = require("./server/routes/courses");                // Cours
 const userRoutes = require("./server/routes/users");                    // Users API (Min)
 const recordRoutes = require("./server/routes/records");                // Record API (Min)
 const registrationRoutes = require("./server/routes/registrations");    // Registration API
+const studentRoutes = require("./server/routes/students");
 
 const app = express();
 
@@ -38,6 +39,7 @@ app.use("/api/courses", courseRoutes);               // Connect to courses
 app.use("/api/users", userRoutes);                   // Connect to users
 app.use("/api/records", recordRoutes);               // Connect to records
 app.use("/api/registrations", registrationRoutes);   // Connect to registations
+app.use("/api/students", studentRoutes);
 
 
 // Test route
@@ -47,6 +49,13 @@ app.get("/", (req, res) => {
     });
 });
 
+// Handle unknown routes
+app.use((req, res) => {
+    res.status(404).json({
+        error: "Route not found",
+        path: req.originalUrl
+    });
+});
 
 // Start server
 app.listen(3000, () => {
