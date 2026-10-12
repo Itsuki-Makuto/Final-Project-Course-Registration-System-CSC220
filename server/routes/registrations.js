@@ -9,10 +9,36 @@ const Record = require("../models/Record");
 const { authenticateToken, requireRole } = require("../middleware/auth");
 
 // GET /api/registrations/student/:studentId
+
+
+
+
 router.get(
     "/student/:studentId",
     authenticateToken,
-    requireRole("advisor"),
+    (req, res, next) => {
+        console.log("=== REGISTRATION AUTH CHECK ===");
+        console.log("JWT USER ID:", req.user.id);
+        console.log("JWT ROLE:", req.user.role);
+        console.log("REQUESTED ID:", req.params.studentId);
+
+        const isAdvisor = req.user.role === "advisor";
+
+        const isStudentOwner =
+            req.user.role === "student" &&
+            String(req.user.id) === String(req.params.studentId);
+
+        console.log("IS ADVISOR:", isAdvisor);
+        console.log("IS STUDENT OWNER:", isStudentOwner);
+
+        if (isAdvisor || isStudentOwner) {
+            return next();
+        }
+
+        return res.status(403).json({
+            error: "Access denied"
+        });
+    },
     async (req, res) => {
         try {
             const { studentId } = req.params;
@@ -37,17 +63,20 @@ router.get(
                 })
                 .sort({ createdAt: 1 });
 
-            res.json(registrations);
+            return res.json(registrations);
 
         } catch (error) {
             console.error(error);
 
-            res.status(500).json({
+            return res.status(500).json({
                 error: "Failed to fetch student registrations"
             });
         }
     }
 );
+
+
+
 
 // POST /api/registrations
 // Advisor registers a student into an offering

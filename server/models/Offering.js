@@ -7,11 +7,11 @@ const offeringSchema = new mongoose.Schema({
   day: { type: String, required: true },
   startTime: { type: String, required: true }, // Format: "09:00"
   endTime: { type: String, required: true },   // Format: "12:00"
-  room: { type: String, required: true },
+  room: { type: String, required: true },      
   instructor: { type: String, required: true },
   seats: { type: Number, required: true },
   seatsTaken: { type: Number, default: 0 },
-  addDropOpen: { type: Boolean, default: false },
+  addDropOpen: { type: Boolean, default: false },   // If the COURSE is open
   addDropCloseDate: { type: Date, default: null     //  added Opening and Close date (Min)
 }
 });
